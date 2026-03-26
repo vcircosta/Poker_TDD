@@ -477,6 +477,23 @@ class HandEvaluatorTest {
         assertTrue(highPair.compareTo(lowPair) > 0);
     }
 
+    @Test
+    void identical_rank_hands_with_different_suits_are_a_tie() {
+        // A♠ K♠ Q♠ J♠ 9♠  vs  A♥ K♥ Q♥ J♥ 9♥ → compareTo == 0
+        var hand1 = HandEvaluator.evaluate(List.of(
+                new Card(Rank.ACE, Suit.SPADES), new Card(Rank.KING, Suit.SPADES),
+                new Card(Rank.QUEEN, Suit.SPADES), new Card(Rank.JACK, Suit.SPADES),
+                new Card(Rank.NINE, Suit.SPADES)));
+        var hand2 = HandEvaluator.evaluate(List.of(
+                new Card(Rank.ACE, Suit.HEARTS), new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.QUEEN, Suit.HEARTS), new Card(Rank.JACK, Suit.HEARTS),
+                new Card(Rank.NINE, Suit.HEARTS)));
+
+        assertEquals(HandCategory.FLUSH, hand1.category());
+        assertEquals(HandCategory.FLUSH, hand2.category());
+        assertEquals(0, hand1.compareTo(hand2));
+    }
+
     private List<Card> combine(List<Card> b, List<Card> h) {
         List<Card> all = new java.util.ArrayList<>(b);
         all.addAll(h);
