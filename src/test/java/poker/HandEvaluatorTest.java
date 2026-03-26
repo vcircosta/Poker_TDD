@@ -231,6 +231,112 @@ class HandEvaluatorTest {
         assertEquals(Rank.TEN, result.chosen5().get(4).rank());
     }
 
+    // -------------------------------------------------------------------------
+    // Tiebreakers
+    // -------------------------------------------------------------------------
+
+    @Test
+    void flush_tiebreak_higher_card_wins() {
+        // A♥ J♥ 9♥ 4♥ 2♥  vs  K♠ Q♠ 9♠ 4♠ 2♠ → first flush wins (A > K)
+        var high = HandEvaluator.evaluate(List.of(
+                new Card(Rank.ACE, Suit.HEARTS), new Card(Rank.JACK, Suit.HEARTS),
+                new Card(Rank.NINE, Suit.HEARTS), new Card(Rank.FOUR, Suit.HEARTS),
+                new Card(Rank.TWO, Suit.HEARTS)));
+        var low = HandEvaluator.evaluate(List.of(
+                new Card(Rank.KING, Suit.SPADES), new Card(Rank.QUEEN, Suit.SPADES),
+                new Card(Rank.NINE, Suit.SPADES), new Card(Rank.FOUR, Suit.SPADES),
+                new Card(Rank.TWO, Suit.SPADES)));
+
+        assertEquals(HandCategory.FLUSH, high.category());
+        assertEquals(HandCategory.FLUSH, low.category());
+        assertTrue(high.compareTo(low) > 0);
+    }
+
+    @Test
+    void two_pair_tiebreak_high_pair_then_low_pair_then_kicker() {
+        // A A K K Q  vs  A A Q Q K → first wins (K pair > Q pair)
+        var highLowPair = HandEvaluator.evaluate(List.of(
+                new Card(Rank.ACE, Suit.SPADES), new Card(Rank.ACE, Suit.HEARTS),
+                new Card(Rank.KING, Suit.SPADES), new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.QUEEN, Suit.SPADES)));
+        var lowLowPair = HandEvaluator.evaluate(List.of(
+                new Card(Rank.ACE, Suit.DIAMONDS), new Card(Rank.ACE, Suit.CLUBS),
+                new Card(Rank.QUEEN, Suit.DIAMONDS), new Card(Rank.QUEEN, Suit.CLUBS),
+                new Card(Rank.KING, Suit.DIAMONDS)));
+
+        assertEquals(HandCategory.TWO_PAIR, highLowPair.category());
+        assertEquals(HandCategory.TWO_PAIR, lowLowPair.category());
+        assertTrue(highLowPair.compareTo(lowLowPair) > 0);
+    }
+
+    @Test
+    void one_pair_tiebreak_pair_rank_then_kickers() {
+        // K K A 9 7  vs  K K A 9 5 → first wins (7 kicker > 5)
+        var high = HandEvaluator.evaluate(List.of(
+                new Card(Rank.KING, Suit.SPADES), new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.ACE, Suit.SPADES), new Card(Rank.NINE, Suit.SPADES),
+                new Card(Rank.SEVEN, Suit.CLUBS)));
+        var low = HandEvaluator.evaluate(List.of(
+                new Card(Rank.KING, Suit.DIAMONDS), new Card(Rank.KING, Suit.CLUBS),
+                new Card(Rank.ACE, Suit.DIAMONDS), new Card(Rank.NINE, Suit.DIAMONDS),
+                new Card(Rank.FIVE, Suit.CLUBS)));
+
+        assertEquals(HandCategory.ONE_PAIR, high.category());
+        assertEquals(HandCategory.ONE_PAIR, low.category());
+        assertTrue(high.compareTo(low) > 0);
+    }
+
+    @Test
+    void three_of_a_kind_tiebreak_triplet_then_kickers() {
+        // Q Q Q A K  vs  Q Q Q A J → first wins (K kicker > J)
+        var high = HandEvaluator.evaluate(List.of(
+                new Card(Rank.QUEEN, Suit.SPADES), new Card(Rank.QUEEN, Suit.HEARTS),
+                new Card(Rank.QUEEN, Suit.DIAMONDS), new Card(Rank.ACE, Suit.SPADES),
+                new Card(Rank.KING, Suit.SPADES)));
+        var low = HandEvaluator.evaluate(List.of(
+                new Card(Rank.QUEEN, Suit.CLUBS), new Card(Rank.QUEEN, Suit.SPADES),
+                new Card(Rank.QUEEN, Suit.HEARTS), new Card(Rank.ACE, Suit.CLUBS),
+                new Card(Rank.JACK, Suit.CLUBS)));
+
+        assertEquals(HandCategory.THREE_OF_A_KIND, high.category());
+        assertEquals(HandCategory.THREE_OF_A_KIND, low.category());
+        assertTrue(high.compareTo(low) > 0);
+    }
+
+    @Test
+    void high_card_tiebreak_descending_ranks() {
+        // A K Q J 9  vs  A K Q J 8 → first wins (9 > 8)
+        var high = HandEvaluator.evaluate(List.of(
+                new Card(Rank.ACE, Suit.SPADES), new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.QUEEN, Suit.DIAMONDS), new Card(Rank.JACK, Suit.CLUBS),
+                new Card(Rank.NINE, Suit.SPADES)));
+        var low = HandEvaluator.evaluate(List.of(
+                new Card(Rank.ACE, Suit.HEARTS), new Card(Rank.KING, Suit.SPADES),
+                new Card(Rank.QUEEN, Suit.CLUBS), new Card(Rank.JACK, Suit.DIAMONDS),
+                new Card(Rank.EIGHT, Suit.HEARTS)));
+
+        assertEquals(HandCategory.HIGH_CARD, high.category());
+        assertEquals(HandCategory.HIGH_CARD, low.category());
+        assertTrue(high.compareTo(low) > 0);
+    }
+
+    @Test
+    void full_house_tiebreak_same_triplet_pair_rank_decides() {
+        // K K K A A  vs  K K K Q Q → first wins (A pair > Q pair)
+        var highPair = HandEvaluator.evaluate(List.of(
+                new Card(Rank.KING, Suit.SPADES), new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.KING, Suit.DIAMONDS), new Card(Rank.ACE, Suit.SPADES),
+                new Card(Rank.ACE, Suit.HEARTS)));
+        var lowPair = HandEvaluator.evaluate(List.of(
+                new Card(Rank.KING, Suit.SPADES), new Card(Rank.KING, Suit.CLUBS),
+                new Card(Rank.KING, Suit.HEARTS), new Card(Rank.QUEEN, Suit.SPADES),
+                new Card(Rank.QUEEN, Suit.HEARTS)));
+
+        assertEquals(HandCategory.FULL_HOUSE, highPair.category());
+        assertEquals(HandCategory.FULL_HOUSE, lowPair.category());
+        assertTrue(highPair.compareTo(lowPair) > 0);
+    }
+
     private List<Card> combine(List<Card> b, List<Card> h) {
         List<Card> all = new java.util.ArrayList<>(b);
         all.addAll(h);
