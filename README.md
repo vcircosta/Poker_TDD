@@ -42,11 +42,23 @@ Le projet a été développé de manière incrémentale. La suite de tests JUnit
 ## 5. Lancement
 ### Prérequis
 * Java 17
-* Maven
+* Maven (optionnel)
 
-### Commandes
+### Avec Maven
 * **Lancer les tests** : `mvn test`
 * **Lancer une simulation aléatoire** : `mvn exec:java -Dexec.mainClass="poker.Main"`
+
+### Sans Maven (javac)
+```bash
+# Compiler
+javac -d out src/main/java/poker/*.java
+
+# Lancer une partie (3 joueurs par défaut)
+java -cp out poker.Main
+
+# Lancer avec un nombre de joueurs personnalisé (2 à 9)
+java -cp out poker.Main 5
+```
 
 ---
 *Projet réalisé par Elise LABARRERE et Valentin CIRCOSTA.*
