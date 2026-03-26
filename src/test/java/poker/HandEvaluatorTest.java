@@ -231,6 +231,30 @@ class HandEvaluatorTest {
         assertEquals(Rank.TEN, result.chosen5().get(4).rank());
     }
 
+    @Test
+    void should_pick_best_five_flush_cards_when_six_suited_available() {
+        // Example C: A♥ J♥ 9♥ 4♥ 2♣ / 6♥ K♦ → chosen5 = A♥ J♥ 9♥ 6♥ 4♥ (2♥ dropped)
+        List<Card> sevenCards = List.of(
+                new Card(Rank.ACE, Suit.HEARTS),
+                new Card(Rank.JACK, Suit.HEARTS),
+                new Card(Rank.NINE, Suit.HEARTS),
+                new Card(Rank.FOUR, Suit.HEARTS),
+                new Card(Rank.TWO, Suit.CLUBS),
+                new Card(Rank.SIX, Suit.HEARTS),
+                new Card(Rank.KING, Suit.DIAMONDS)
+        );
+
+        var result = HandEvaluator.evaluate(sevenCards);
+
+        assertEquals(HandCategory.FLUSH, result.category());
+        assertEquals(5, result.chosen5().size());
+        assertEquals(Rank.ACE, result.chosen5().get(0).rank());
+        assertEquals(Rank.JACK, result.chosen5().get(1).rank());
+        assertEquals(Rank.NINE, result.chosen5().get(2).rank());
+        assertEquals(Rank.SIX, result.chosen5().get(3).rank());
+        assertEquals(Rank.FOUR, result.chosen5().get(4).rank());
+    }
+
     // -------------------------------------------------------------------------
     // Tiebreakers
     // -------------------------------------------------------------------------
