@@ -113,6 +113,23 @@ class HandEvaluatorTest {
         assertEquals(Rank.ACE, result.chosen5().get(4).rank());
     }
 
+    @Test
+    void should_decide_winner_with_kicker_when_quads_on_board() {
+        List<Card> board = List.of(
+                new Card(Rank.SEVEN, Suit.SPADES), new Card(Rank.SEVEN, Suit.HEARTS),
+                new Card(Rank.SEVEN, Suit.DIAMONDS), new Card(Rank.SEVEN, Suit.CLUBS),
+                new Card(Rank.TWO, Suit.HEARTS)
+        );
+
+        List<Card> p1Hole = List.of(new Card(Rank.ACE, Suit.SPADES), new Card(Rank.KING, Suit.HEARTS));
+        List<Card> p2Hole = List.of(new Card(Rank.QUEEN, Suit.SPADES), new Card(Rank.JACK, Suit.HEARTS));
+
+        var p1Best = HandEvaluator.evaluate(combine(board, p1Hole));
+        var p2Best = HandEvaluator.evaluate(combine(board, p2Hole));
+
+        assertTrue(p1Best.compareTo(p2Best) > 0);
+    }
+
     private List<Card> combine(List<Card> b, List<Card> h) {
         List<Card> all = new java.util.ArrayList<>(b);
         all.addAll(h);
