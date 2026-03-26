@@ -1,6 +1,0 @@
-poker\Card.class
-poker\EvaluationResult.class
-poker\Rank.class
-poker\HandCategory.class
-poker\HandEvaluator.class
-poker\Suit.class
