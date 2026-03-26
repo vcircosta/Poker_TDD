@@ -1,3 +1,2 @@
-NOM Prénom - Étudiant 1
-NOM Prénom - Étudiant 2
-NOM Prénom - Étudiant 3
+LABARRERE Elise - Étudiant 1
+CIRCOSTA Valentin - Étudiant 2
