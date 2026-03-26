@@ -151,6 +151,26 @@ class HandEvaluatorTest {
         assertDoesNotThrow(() -> Main.main(new String[]{}));
     }
 
+    @Test
+    void should_identify_ace_high_straight() {
+        // Example B: 10♣ J♦ Q♥ K♠ 2♦ / A♣ 3♦ → Straight A-high
+        List<Card> sevenCards = List.of(
+                new Card(Rank.TEN, Suit.CLUBS),
+                new Card(Rank.JACK, Suit.DIAMONDS),
+                new Card(Rank.QUEEN, Suit.HEARTS),
+                new Card(Rank.KING, Suit.SPADES),
+                new Card(Rank.TWO, Suit.DIAMONDS),
+                new Card(Rank.ACE, Suit.CLUBS),
+                new Card(Rank.THREE, Suit.DIAMONDS)
+        );
+
+        var result = HandEvaluator.evaluate(sevenCards);
+
+        assertEquals(HandCategory.STRAIGHT, result.category());
+        assertEquals(Rank.ACE, result.chosen5().get(0).rank());
+        assertEquals(Rank.TEN, result.chosen5().get(4).rank());
+    }
+
     private List<Card> combine(List<Card> b, List<Card> h) {
         List<Card> all = new java.util.ArrayList<>(b);
         all.addAll(h);
