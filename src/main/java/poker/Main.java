@@ -4,15 +4,20 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
+        int numberOfPlayers = args.length > 0 ? Integer.parseInt(args[0]) : 3;
+        if (numberOfPlayers < 2 || numberOfPlayers > 9)
+            throw new IllegalArgumentException("Number of players must be between 2 and 9.");
+
         // 1. Initialisation
         Deck deck = new Deck();
         deck.shuffle();
 
         // 2. Distribution (2 cartes par joueur)
-        Map<String, List<Card>> players = new HashMap<>();
-        players.put("Alice", List.of(deck.draw(), deck.draw()));
-        players.put("Bob", List.of(deck.draw(), deck.draw()));
-        players.put("Charlie", List.of(deck.draw(), deck.draw()));
+        String[] names = {"Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Hank", "Ivy"};
+        Map<String, List<Card>> players = new LinkedHashMap<>();
+        for (int i = 0; i < numberOfPlayers; i++) {
+            players.put(names[i], List.of(deck.draw(), deck.draw()));
+        }
 
         // 3. Le Board (5 cartes communes)
         List<Card> board = List.of(
