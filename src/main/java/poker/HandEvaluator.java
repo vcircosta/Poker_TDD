@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 public class HandEvaluator {
 
     public static EvaluationResult evaluate(List<Card> cards) {
-        // Génère les 21 combinaisons possibles (5 parmi 7) [cite: 20]
         return generateCombinations(cards, 5).stream()
                 .map(HandEvaluator::evaluateFiveCards)
                 .max(EvaluationResult::compareTo)
@@ -14,11 +13,9 @@ public class HandEvaluator {
     }
 
     private static EvaluationResult evaluateFiveCards(List<Card> fiveCards) {
-        // 1. Calcul des fréquences (Evite les doublons de calcul)
         Map<Rank, Long> counts = fiveCards.stream()
                 .collect(Collectors.groupingBy(Card::rank, Collectors.counting()));
 
-        // 2. Tri par importance (Fréquence, puis Valeur)
         List<Card> sorted = fiveCards.stream()
                 .sorted((c1, c2) -> {
                     long count1 = counts.get(c1.rank());
@@ -27,7 +24,6 @@ public class HandEvaluator {
                     return Integer.compare(c2.rank().getValue(), c1.rank().getValue());
                 }).toList();
 
-        // 3. Détection des catégories (Ordre décroissant obligatoire) [cite: 24]
         boolean isFlush = fiveCards.stream().map(Card::suit).distinct().count() == 1;
         Optional<List<Card>> straightCards = getStraightCards(fiveCards);
 
@@ -45,19 +41,17 @@ public class HandEvaluator {
         return new EvaluationResult(HandCategory.HIGH_CARD, sorted);
     }
 
-    // Gestion de la Quinte incluant l'As-bas (Wheel)
     private static Optional<List<Card>> getStraightCards(List<Card> cards) {
         List<Card> distinctSorted = cards.stream()
                 .sorted(Comparator.comparingInt((Card c) -> c.rank().getValue()).reversed())
                 .toList();
 
-        // Cas spécial de l'As-bas (A, 2, 3, 4, 5) [cite: 40, 74, 133]
         boolean hasAce = distinctSorted.get(0).rank() == Rank.ACE;
         boolean isWheel = hasAce && distinctSorted.get(1).rank() == Rank.FIVE && distinctSorted.get(4).rank() == Rank.TWO;
 
         if (isWheel) {
             List<Card> wheel = new ArrayList<>(distinctSorted.subList(1, 5));
-            wheel.add(distinctSorted.get(0)); // L'As à la fin [cite: 74]
+            wheel.add(distinctSorted.get(0));
             return Optional.of(wheel);
         }
 

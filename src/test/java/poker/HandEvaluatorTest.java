@@ -96,6 +96,23 @@ class HandEvaluatorTest {
         assertEquals(Rank.TWO, result.chosen5().get(3).rank());
     }
 
+    @Test
+    void should_identify_ace_low_straight_as_five_high() {
+        List<Card> cards = List.of(
+                new Card(Rank.ACE, Suit.SPADES),
+                new Card(Rank.TWO, Suit.HEARTS),
+                new Card(Rank.THREE, Suit.DIAMONDS),
+                new Card(Rank.FOUR, Suit.CLUBS),
+                new Card(Rank.FIVE, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+
+        assertEquals(HandCategory.STRAIGHT, result.category());
+        assertEquals(Rank.FIVE, result.chosen5().get(0).rank());
+        assertEquals(Rank.ACE, result.chosen5().get(4).rank());
+    }
+
     private List<Card> combine(List<Card> b, List<Card> h) {
         List<Card> all = new java.util.ArrayList<>(b);
         all.addAll(h);
