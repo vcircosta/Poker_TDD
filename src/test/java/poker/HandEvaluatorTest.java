@@ -1,0 +1,105 @@
+package poker;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+
+class HandEvaluatorTest {
+
+    @Test
+    void should_identify_high_card() {
+        List<Card> cards = List.of(
+                new Card(Rank.ACE, Suit.SPADES),
+                new Card(Rank.JACK, Suit.HEARTS),
+                new Card(Rank.NINE, Suit.DIAMONDS),
+                new Card(Rank.FOUR, Suit.CLUBS),
+                new Card(Rank.TWO, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.HIGH_CARD, result.category());
+    }
+
+    @Test
+    void should_identify_one_pair() {
+        List<Card> cards = List.of(
+                new Card(Rank.ACE, Suit.SPADES),
+                new Card(Rank.ACE, Suit.HEARTS),
+                new Card(Rank.JACK, Suit.DIAMONDS),
+                new Card(Rank.NINE, Suit.CLUBS),
+                new Card(Rank.FOUR, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.ONE_PAIR, result.category());
+        assertEquals(Rank.ACE, result.chosen5().get(0).rank());
+    }
+
+    @Test
+    void should_identify_flush() {
+        List<Card> cards = List.of(
+                new Card(Rank.ACE, Suit.HEARTS),
+                new Card(Rank.JACK, Suit.HEARTS),
+                new Card(Rank.NINE, Suit.HEARTS),
+                new Card(Rank.FOUR, Suit.HEARTS),
+                new Card(Rank.TWO, Suit.HEARTS)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.FLUSH, result.category());
+    }
+
+    @Test
+    void should_select_best_five_from_seven_cards() {
+        List<Card> sevenCards = List.of(
+                new Card(Rank.ACE, Suit.SPADES),
+                new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.TWO, Suit.DIAMONDS),
+                new Card(Rank.FOUR, Suit.CLUBS),
+                new Card(Rank.SIX, Suit.SPADES),
+                new Card(Rank.EIGHT, Suit.HEARTS),
+                new Card(Rank.TEN, Suit.DIAMONDS)
+        );
+
+        var result = HandEvaluator.evaluate(sevenCards);
+        assertEquals(5, result.chosen5().size());
+        assertEquals(Rank.ACE, result.chosen5().get(0).rank());
+    }
+    @Test
+    void should_find_winner_among_multiple_players() {
+        List<Card> board = List.of(
+                new Card(Rank.ACE, Suit.DIAMONDS), new Card(Rank.KING, Suit.DIAMONDS),
+                new Card(Rank.TEN, Suit.DIAMONDS), new Card(Rank.EIGHT, Suit.SPADES),
+                new Card(Rank.TWO, Suit.CLUBS)
+        );
+
+        List<Card> p1Hole = List.of(new Card(Rank.QUEEN, Suit.DIAMONDS), new Card(Rank.JACK, Suit.DIAMONDS)); // Royal Flush
+        List<Card> p2Hole = List.of(new Card(Rank.ACE, Suit.SPADES), new Card(Rank.ACE, Suit.CLUBS));        // Brelan d'As
+
+        var p1Best = HandEvaluator.evaluate(combine(board, p1Hole));
+        var p2Best = HandEvaluator.evaluate(combine(board, p2Hole));
+
+        assertTrue(p1Best.compareTo(p2Best) > 0);
+    }
+
+    @Test
+    void should_identify_full_house_and_sort_by_triplet_then_pair() {
+        List<Card> cards = List.of(
+                new Card(Rank.TEN, Suit.SPADES), new Card(Rank.TEN, Suit.HEARTS), new Card(Rank.TEN, Suit.DIAMONDS),
+                new Card(Rank.TWO, Suit.CLUBS), new Card(Rank.TWO, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+
+        assertEquals(HandCategory.FULL_HOUSE, result.category());
+        assertEquals(Rank.TEN, result.chosen5().get(0).rank());
+        assertEquals(Rank.TWO, result.chosen5().get(3).rank());
+    }
+
+    private List<Card> combine(List<Card> b, List<Card> h) {
+        List<Card> all = new java.util.ArrayList<>(b);
+        all.addAll(h);
+        return all;
+    }
+
+}
