@@ -27,19 +27,34 @@ public class Main {
         );
 
         // 4. Affichage du contexte
-        System.out.println("--- BOARD ---");
-        System.out.println(board);
-        System.out.println("\n--- MAINS DES JOUEURS ---");
-        players.forEach((name, hand) -> System.out.println(name + " : " + hand));
+        System.out.println("=== Cartes communes ===");
+        board.forEach(c -> System.out.print(c + "  "));
+        System.out.println("\n");
+
+        System.out.println("=== Mains des joueurs ===");
+        players.forEach((name, hand) -> System.out.println(name + " : " + hand.get(0) + "  " + hand.get(1)));
+        System.out.println();
 
         // 5. Détermination du gagnant
+        Map<String, EvaluationResult> results = new LinkedHashMap<>();
+        players.forEach((name, hand) -> {
+            List<Card> fullHand = new ArrayList<>(board);
+            fullHand.addAll(hand);
+            results.put(name, HandEvaluator.evaluate(fullHand));
+        });
+
+        System.out.println("=== Classement des joueurs ===");
+        results.forEach((name, res) -> System.out.println(name + " → " + res.category() + " " + res.chosen5()));
+        System.out.println();
+
         List<String> winners = PokerGame.findWinners(players, board);
 
-        System.out.println("\n--- RÉSULTAT ---");
+        System.out.println("=== Résultat ===");
         if (winners.size() > 1) {
             System.out.println("Égalité entre : " + String.join(", ", winners));
         } else {
-            System.out.println("Le vainqueur est : " + winners.get(0));
+            String winner = winners.get(0);
+            System.out.println("Gagnant : " + winner + " avec " + results.get(winner).category() + " " + results.get(winner).chosen5());
         }
 
     }

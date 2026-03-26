@@ -1,7 +1,7 @@
 package poker;
 
 public enum Suit {
-    HEARTS("H"), DIAMONDS("D"), CLUBS("C"), SPADES("S");
+    HEARTS("♥"), DIAMONDS("♦"), CLUBS("♣"), SPADES("♠");
 
     private final String symbol;
     Suit(String symbol) { this.symbol = symbol; }
