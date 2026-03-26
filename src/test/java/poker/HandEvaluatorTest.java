@@ -39,6 +39,66 @@ class HandEvaluatorTest {
     }
 
     @Test
+    void should_identify_two_pair() {
+        List<Card> cards = List.of(
+                new Card(Rank.KING, Suit.SPADES),
+                new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.NINE, Suit.DIAMONDS),
+                new Card(Rank.NINE, Suit.CLUBS),
+                new Card(Rank.ACE, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.TWO_PAIR, result.category());
+    }
+
+    @Test
+    void should_identify_three_of_a_kind() {
+        List<Card> cards = List.of(
+                new Card(Rank.QUEEN, Suit.SPADES),
+                new Card(Rank.QUEEN, Suit.HEARTS),
+                new Card(Rank.QUEEN, Suit.DIAMONDS),
+                new Card(Rank.FIVE, Suit.CLUBS),
+                new Card(Rank.TWO, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.THREE_OF_A_KIND, result.category());
+    }
+
+    @Test
+    void should_identify_straight() {
+        List<Card> cards = List.of(
+                new Card(Rank.SIX, Suit.SPADES),
+                new Card(Rank.SEVEN, Suit.HEARTS),
+                new Card(Rank.EIGHT, Suit.DIAMONDS),
+                new Card(Rank.NINE, Suit.CLUBS),
+                new Card(Rank.TEN, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.STRAIGHT, result.category());
+        assertEquals(Rank.TEN, result.chosen5().get(0).rank());
+        assertEquals(Rank.SIX, result.chosen5().get(4).rank());
+    }
+
+    @Test
+    void should_identify_straight_flush() {
+        List<Card> cards = List.of(
+                new Card(Rank.FIVE, Suit.HEARTS),
+                new Card(Rank.SIX, Suit.HEARTS),
+                new Card(Rank.SEVEN, Suit.HEARTS),
+                new Card(Rank.EIGHT, Suit.HEARTS),
+                new Card(Rank.NINE, Suit.HEARTS)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.STRAIGHT_FLUSH, result.category());
+        assertEquals(Rank.NINE, result.chosen5().get(0).rank());
+        assertEquals(Rank.FIVE, result.chosen5().get(4).rank());
+    }
+
+    @Test
     void should_identify_flush() {
         List<Card> cards = List.of(
                 new Card(Rank.ACE, Suit.HEARTS),
