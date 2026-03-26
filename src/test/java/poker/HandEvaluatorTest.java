@@ -232,6 +232,71 @@ class HandEvaluatorTest {
     }
 
     @Test
+    void should_identify_four_of_a_kind() {
+        List<Card> cards = List.of(
+                new Card(Rank.JACK, Suit.SPADES),
+                new Card(Rank.JACK, Suit.HEARTS),
+                new Card(Rank.JACK, Suit.DIAMONDS),
+                new Card(Rank.JACK, Suit.CLUBS),
+                new Card(Rank.THREE, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.FOUR_OF_A_KIND, result.category());
+        assertEquals(Rank.JACK, result.chosen5().get(0).rank());
+        assertEquals(Rank.THREE, result.chosen5().get(4).rank());
+    }
+
+    @Test
+    void wrap_around_straight_is_invalid() {
+        // Q K A 2 3 must NOT be detected as a straight (no wrap-around)
+        List<Card> cards = List.of(
+                new Card(Rank.QUEEN, Suit.SPADES),
+                new Card(Rank.KING, Suit.HEARTS),
+                new Card(Rank.ACE, Suit.DIAMONDS),
+                new Card(Rank.TWO, Suit.CLUBS),
+                new Card(Rank.THREE, Suit.SPADES)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertNotEquals(HandCategory.STRAIGHT, result.category());
+    }
+
+    @Test
+    void should_identify_wheel_straight_flush() {
+        // A♥ 2♥ 3♥ 4♥ 5♥ → straight flush 5-high
+        List<Card> cards = List.of(
+                new Card(Rank.ACE, Suit.HEARTS),
+                new Card(Rank.TWO, Suit.HEARTS),
+                new Card(Rank.THREE, Suit.HEARTS),
+                new Card(Rank.FOUR, Suit.HEARTS),
+                new Card(Rank.FIVE, Suit.HEARTS)
+        );
+
+        var result = HandEvaluator.evaluate(cards);
+        assertEquals(HandCategory.STRAIGHT_FLUSH, result.category());
+        assertEquals(Rank.FIVE, result.chosen5().get(0).rank());
+        assertEquals(Rank.ACE, result.chosen5().get(4).rank());
+    }
+
+    @Test
+    void straight_flush_tiebreak_higher_wins() {
+        // 9♥ 8♥ 7♥ 6♥ 5♥  vs  8♠ 7♠ 6♠ 5♠ 4♠ → first wins (9-high > 8-high)
+        var high = HandEvaluator.evaluate(List.of(
+                new Card(Rank.NINE, Suit.HEARTS), new Card(Rank.EIGHT, Suit.HEARTS),
+                new Card(Rank.SEVEN, Suit.HEARTS), new Card(Rank.SIX, Suit.HEARTS),
+                new Card(Rank.FIVE, Suit.HEARTS)));
+        var low = HandEvaluator.evaluate(List.of(
+                new Card(Rank.EIGHT, Suit.SPADES), new Card(Rank.SEVEN, Suit.SPADES),
+                new Card(Rank.SIX, Suit.SPADES), new Card(Rank.FIVE, Suit.SPADES),
+                new Card(Rank.FOUR, Suit.SPADES)));
+
+        assertEquals(HandCategory.STRAIGHT_FLUSH, high.category());
+        assertEquals(HandCategory.STRAIGHT_FLUSH, low.category());
+        assertTrue(high.compareTo(low) > 0);
+    }
+
+    @Test
     void should_pick_best_five_flush_cards_when_six_suited_available() {
         // Example C: A♥ J♥ 9♥ 4♥ 2♣ / 6♥ K♦ → chosen5 = A♥ J♥ 9♥ 6♥ 4♥ (2♥ dropped)
         List<Card> sevenCards = List.of(
