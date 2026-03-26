@@ -2,7 +2,10 @@ package poker;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class HandEvaluatorTest {
 
@@ -128,6 +131,24 @@ class HandEvaluatorTest {
         var p2Best = HandEvaluator.evaluate(combine(board, p2Hole));
 
         assertTrue(p1Best.compareTo(p2Best) > 0);
+    }
+
+    @Test
+    void deck_should_contain_52_unique_cards() {
+        Deck deck = new Deck();
+        Set<Card> drawnCards = new HashSet<>();
+
+        for (int i = 0; i < 52; i++) {
+            drawnCards.add(deck.draw());
+        }
+
+        assertEquals(52, drawnCards.size());
+        assertThrows(IllegalStateException.class, deck::draw); // Vérifie l'erreur quand vide
+    }
+
+    @Test
+    void main_method_should_run_without_errors() {
+        assertDoesNotThrow(() -> Main.main(new String[]{}));
     }
 
     private List<Card> combine(List<Card> b, List<Card> h) {
